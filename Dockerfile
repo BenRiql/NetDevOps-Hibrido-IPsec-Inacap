@@ -12,4 +12,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Comando para ejecutar la automatización al iniciar
-CMD ["/bin/bash"]
+CMD ["python", "App.py"]
