@@ -1,15 +1,16 @@
-# Imagen base de Python liviana
 FROM python:3.11-slim
 
-# Directorio de trabajo
 WORKDIR /app
 
-# Copiar archivos de dependencias e instalar
+RUN apt-get update && apt-get install -y \
+    iproute2 \
+    iputils-ping \
+    net-tools \
+    openssh-client \
+    && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar el resto del código
 COPY . .
 
-# Comando para ejecutar la automatización al iniciar
-CMD ["python", "App.py"]
+CMD sh -c "ip addr add 192.168.122.100/24 dev eth0 && python App.py; tail -f /dev/null"

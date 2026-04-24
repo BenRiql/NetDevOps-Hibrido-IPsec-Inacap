@@ -1,11 +1,42 @@
 from netmiko import ConnectHandler
+import time
 
 class RouterManager:
     def __init__(self, config):
         self.config = config
 
     def _connect(self, name):
-        return ConnectHandler(**self.config[name])
+        nodo = self.config[name]
+
+        for intento in range(5):
+            try:
+                print(f"[INFO] Conectando a {name} ({nodo['host']})...")
+
+                device = {
+                    "device_type": nodo["device_type"],
+                    "host": nodo["host"],
+                    "username": nodo["auth"]["username"],
+                    "password": nodo["auth"]["password"],
+                    "secret": nodo["auth"]["password"],
+
+                    # estabilidad
+                    "fast_cli": False,
+                    "conn_timeout": 20,
+                    "auth_timeout": 20,
+                    "banner_timeout": 30,
+                }
+
+                conn = ConnectHandler(**device)
+                conn.enable()
+
+                print(f"[OK] Conectado a {name}")
+                return conn
+
+            except Exception as e:
+                print(f"[REINTENTO {intento+1}] {name} no disponible: {e}")
+                time.sleep(10)
+
+        raise Exception(f"No se pudo conectar a {name}")
 
     def configurar_r2(self):
         print(">>> Configurando R2 (ISP)...")
@@ -22,12 +53,14 @@ class RouterManager:
                 "ip address 200.1.23.1 255.255.255.252",
                 "no shutdown",
 
-                # Rutas correctas
+                # rutas
                 "ip route 200.1.13.0 255.255.255.252 200.1.23.2",
                 "ip route 200.1.12.0 255.255.255.252 200.1.12.1"
             ]
 
-            print(conn.send_config_set(comandos))
+            output = conn.send_config_set(comandos)
+            print(output)
+
             conn.disconnect()
 
         except Exception as e:
@@ -51,7 +84,7 @@ class RouterManager:
                 "interface loopback10",
                 "ip address 192.168.10.1 255.255.255.0",
 
-                # Ruta hacia R3
+                # ruta hacia R3
                 "ip route 192.168.30.0 255.255.255.0 200.1.13.2",
 
                 # --- IPSEC ---
@@ -77,7 +110,9 @@ class RouterManager:
                 "crypto map CMAP"
             ]
 
-            print(conn.send_config_set(config))
+            output = conn.send_config_set(config)
+            print(output)
+
             conn.disconnect()
 
         except Exception as e:
