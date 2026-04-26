@@ -54,17 +54,6 @@ Policy
 Ejecución dentro de contenedor Docker
 Logs de ejecución para verificación
 
-### Estructura del proyecto
-.
-├── App.py
-├── src/
-│   ├── routers.py
-│   ├── api_rest.py
-│   ├── config.py
-├── Dockerfile
-├── requirements.txt
-└── README.md
-
 ### Configuración previa
 
 Antes de ejecutar el script:
