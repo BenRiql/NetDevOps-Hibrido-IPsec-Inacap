@@ -16,7 +16,7 @@ def main():
 
     print(">>> Configurando MikroTik (R3)...")
     r3 = R3Manager(NODOS["R3"])
-    r3.configurar_ipsec_api()
+    r3.configurar_completo()
 
     print("=== FIN ===")
 
